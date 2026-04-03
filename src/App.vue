@@ -53,6 +53,31 @@ function handleAddPost(newPost) {
   // 更新我的貼文列表
   updateMyPosts()
 }
+
+// 建立處理按讚的功能
+// 當便利貼卡片說有人按讚時，會執行這個功能
+function handleToggleLike(postId) {
+  // 找出是哪個便利貼被按讚
+  const post = posts.value.find(p => p.id === postId)
+  
+  // 如果找到了
+  if (post) {
+    // 如果已經按過讚（liked 是 true），就取消讚
+    if (post.liked) {
+      // 讚數 -1
+      post.likes--
+      // 改成沒按讚
+      post.liked = false
+    } 
+    // 如果沒按過讚（liked 是 false），就按讚
+    else {
+      // 讚數 +1
+      post.likes++
+      // 改成有按讚
+      post.liked = true
+    }
+  }
+}
 </script>
 
 <template>
@@ -75,7 +100,8 @@ function handleAddPost(newPost) {
         
         <!-- 便利貼列表 -->
         <!-- 把便利貼盒子傳給列表小幫手 -->
-        <PostList :posts="posts" />
+        <!-- @toggle-like="handleToggleLike" 當有人按讚時，觸發這個功能 -->
+        <PostList :posts="posts" @toggle-like="handleToggleLike" />
       </div>
       
       <!-- 如果現在在個人檔案，就顯示個人檔案頁面 -->

@@ -9,6 +9,9 @@ const props = defineProps({
     required: true
   }
 })
+
+// 這是「發送訊號」- 告訴外面有人按讚了
+const emit = defineEmits(['toggle-like'])
 </script>
 
 <template>
@@ -20,6 +23,7 @@ const props = defineProps({
       v-for="post in posts" 
       :key="post.id" 
       :post="post" 
+      @toggle-like="emit('toggle-like', $event)"
     />
   </div>
 </template>
