@@ -1,8 +1,14 @@
 <script setup>
 // 引入便利貼卡片小幫手
 import PostCard from './PostCard.vue'
-// 引入假資料小幫手（便利貼工廠）
-import { posts } from '../data/mock.js'
+
+// 這是「接收的禮物」- 從外面傳進來的便利貼列表
+const props = defineProps({
+  posts: {
+    type: Array,
+    required: true
+  }
+})
 </script>
 
 <template>

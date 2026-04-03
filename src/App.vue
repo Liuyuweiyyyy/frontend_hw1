@@ -5,10 +5,16 @@ import PostList from './components/PostList.vue'
 import NavBar from './components/NavBar.vue'
 // 引入個人檔案小幫手
 import UserProfile from './components/UserProfile.vue'
+// 引入發布小幫手
+import CreatePost from './components/CreatePost.vue'
 // 引入假資料小幫手
-import { posts } from './data/mock.js'
+import { posts as initialPosts } from './data/mock.js'
 // 引入「盒子」功能
 import { ref } from 'vue'
+
+// 這個「盒子」用來存放所有便利貼
+// 用 initialPosts 來初始化（假資料）
+const posts = ref(initialPosts)
 
 // 這個「盒子」用來記錄目前登入的使用者資料
 const currentUser = {
@@ -21,7 +27,11 @@ const currentUser = {
 
 // 這個「盒子」用來記錄小明發過的貼文
 // 用「篩選」把是小明的貼文找出來
-const myPosts = ref(posts.filter(post => post.author === '小明'))
+const myPosts = ref([])
+function updateMyPosts() {
+  myPosts.value = posts.value.filter(post => post.author === '小明')
+}
+updateMyPosts()
 
 // 建立一個「盒子」來存放目前在哪個頁面
 // 一開始在「首頁」（home）
@@ -32,6 +42,16 @@ const page = ref('home')
 function changePage(newPage) {
   // 把 page 盒子裡的值更新
   page.value = newPage
+}
+
+// 建立處理新貼文的功能
+// 當發布小幫手說有新貼文時，會執行這個功能
+function handleAddPost(newPost) {
+  // 把新便利貼「放進」便利貼盒子的最前面
+  posts.value.unshift(newPost)
+  
+  // 更新我的貼文列表
+  updateMyPosts()
 }
 </script>
 
@@ -49,7 +69,14 @@ function changePage(newPage) {
     <!-- 主要內容區塊 -->
     <main>
       <!-- 如果現在在首頁，就顯示便利貼列表 -->
-      <PostList v-if="page === 'home'" />
+      <div v-if="page === 'home'">
+        <!-- 發布新貼文（在最上面） -->
+        <CreatePost @add-post="handleAddPost" />
+        
+        <!-- 便利貼列表 -->
+        <!-- 把便利貼盒子傳給列表小幫手 -->
+        <PostList :posts="posts" />
+      </div>
       
       <!-- 如果現在在個人檔案，就顯示個人檔案頁面 -->
       <!-- 把使用者資料和貼文傳給個人檔案小幫手 -->
