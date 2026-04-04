@@ -7,10 +7,12 @@ import NavBar from './components/NavBar.vue'
 import UserProfile from './components/UserProfile.vue'
 // 引入發布小幫手
 import CreatePost from './components/CreatePost.vue'
+// 引入搜尋小幫手
+import SearchBar from './components/SearchBar.vue'
 // 引入假資料小幫手
-import { posts as initialPosts } from './data/mock.js'
+import { posts as initialPosts, users } from './data/mock.js'
 // 引入「盒子」功能
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 // 這個「盒子」用來存放所有便利貼
 // 用 initialPosts 來初始化（假資料）
@@ -78,6 +80,26 @@ function handleToggleLike(postId) {
     }
   }
 }
+
+// 這個「盒子」用來記錄「目前看誰的檔案」
+// 一開始看「小明」的檔案
+const viewingUser = ref({ ...currentUser })
+
+// 這個「計算盒」會自動篩選「目前看的那個用戶」的貼文
+// 當 viewingUser 改變時，會自動更新
+const viewingUserPosts = computed(() => {
+  return posts.value.filter(post => post.author === viewingUser.value.name)
+})
+
+// 建立處理「選了某個用戶」的功能
+// 當搜尋小幫手說有人被選時，會執行這個功能
+function handleSelectUser(user) {
+  // 更新「目前看誰」的盒子
+  viewingUser.value = user
+  
+  // 切換到「個人檔案」頁面
+  page.value = 'profile'
+}
 </script>
 
 <template>
@@ -95,21 +117,26 @@ function handleToggleLike(postId) {
     <main>
       <!-- 如果現在在首頁，就顯示便利貼列表 -->
       <div v-if="page === 'home'" class="home-content">
-        <!-- 發布新貼文（在最上面） -->
+        <!-- 搜尋小幫手（在最上面） -->
+        <!-- :users="users" 把用戶清單傳給搜尋小幫手 -->
+        <!-- @select-user="handleSelectUser" 當有人被選時，觸發這個功能 -->
+        <SearchBar :users="users" @select-user="handleSelectUser" />
+        
+        <!-- 發布新貼文（在搜尋框下面） -->
         <CreatePost @add-post="handleAddPost" />
         
         <!-- 便利貼列表 -->
         <!-- 把便利貼盒子傳給列表小幫手 -->
-        <!-- @toggle-like="handleToggleLike" 當有人按讚時，觸發這個功能 -->
+        <!-- @toggle-like="handleToggleLike" 當有人按按讚時，觸發這個功能 -->
         <PostList :posts="posts" @toggle-like="handleToggleLike" />
       </div>
       
       <!-- 如果現在在個人檔案，就顯示個人檔案頁面 -->
-      <!-- 把使用者資料和貼文傳給個人檔案小幫手 -->
+      <!-- 把「目前看誰」的資料和貼文傳給個人檔案小幫手 -->
       <UserProfile 
         v-else-if="page === 'profile'" 
-        :user="currentUser"
-        :user-posts="myPosts"
+        :user="viewingUser"
+        :user-posts="viewingUserPosts"
       />
     </main>
   </div>
